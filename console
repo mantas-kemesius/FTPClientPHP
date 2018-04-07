@@ -1,0 +1,71 @@
+#!/usr/bin/env php
+<?php
+
+use FtpClient\Action;
+use FtpClient\Security;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+//Initial
+$security = new Security();
+$security->connect();
+$action = new Action($security->getConnectionId());
+
+$status = true;
+$action->run();
+
+while($status) {
+    $command = $action->listen();
+    if (strpos($command, " ") > 0){
+        $other = $action->getAllAfterSpace($command);
+        $command = $action->getCommand($command);
+    }
+
+    switch ($command) {
+        case "ls":
+            $action->ls();
+            break;
+        case "help":
+            $action->help();
+            break;
+        case "cd":
+            $action->cd($other);
+            break;
+        case "size": //file
+            $action->size($other);
+            break;
+        case "pwd":
+            $action->pwd();
+            break;
+        case "mkdir":
+            $action->mkdir($other);
+            break;
+        case "put": //file
+            $action->put($other);
+            break;
+        case "get": //file
+            $action->get($other);
+            break;
+        case "delete": //file
+            $action->delete($other);
+            break;
+        case "rename": //file
+            $otherOne = $action->getAllAfterSpace($other);
+            $other = $action->getCommand($other);
+            $action->rename($other, $otherOne);
+            break;
+        case "chmod":
+            $otherOne = $action->getAllAfterSpace($other);
+            $other = $action->getCommand($other);
+            $action->chmod($other, $otherOne);
+            break;
+        case "rmdir":
+            $action->rmdir($other);
+            break;
+        case "bye":
+            $status = false;
+            break;
+    }
+}
+
+$security->closeConnection();

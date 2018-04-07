@@ -1,0 +1,4 @@
+security:
+  host: ftp_server_url
+  username: username
+  password: password
